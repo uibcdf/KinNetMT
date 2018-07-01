@@ -1,10 +1,8 @@
-# MolSysMT
+# KinNetMT
 
-<!---
 [![Anaconda Cloud Badge](https://anaconda.org/uibcdf/kinnetmt/badges/version.svg)](https://anaconda.org/uibcdf/kinnetmt)
 [![Anaconda Cloud Downloads](https://anaconda.org/uibcdf/kinnetmt/badges/downloads.svg)](https://anaconda.org/uibcdf/kinnetmt)
 [![DOI](https://zenodo.org/badge/130507248.svg)](https://zenodo.org/badge/latestdoi/130507248)
---!>
 
 **[Installation](#installation)** |
 **[Documentation](#documentation)** |

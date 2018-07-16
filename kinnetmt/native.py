@@ -146,10 +146,10 @@ class Network():
 
         if verbose:
 
-            print '# Network:'
-            print '#', self.num_nodes, 'nodes'
-            print '#', self.k_total, 'links out'
-            print '#', self.weight, 'total weight nodes'
+            print ('# Network:')
+            print ('#', self.num_nodes, 'nodes')
+            print ('#', self.k_total, 'links out')
+            print ('#', self.weight, 'total weight nodes')
 
         pass
 
@@ -280,7 +280,7 @@ class Network():
             self.info(update=True,verbose=False)
 
         else:
-            print '# Ts arrays needed and self.Ts==True.'
+            print('# Ts arrays needed and self.Ts==True.')
             pass
 
     def remove_Ts(self):
@@ -535,189 +535,187 @@ class Network():
         fff.close()
         pass
 
-    def load_labels(self,name_file,format='text'):
+###    def load_labels(self,name_file,format='text'):
+###
+###        """format=[text,water]"""
+###
+###        self.file_labels=name_file
+###
+###        fff=open(name_file,'r')
+###
+###        if format == 'water':
+###            for ii in range(self.num_nodes):
+###                line=fff.readline()
+###                mss=line.split()[1]+' |'
+###                for jj in range(2,6):
+###                    mss=mss+' '+line.split()[jj]
+###                    mss=mss+' |' 
+###                for jj in range(6,9):
+###                    mss=mss+' '+line.split()[jj]
+###                    mss=mss+' |'
+###                for jj in range(9,12):
+###                    mss=mss+' '+line.split()[jj]
+###                    mss=mss+' |'
+###                for jj in range(12,15):
+###                    mss=mss+' '+line.split()[jj]
+###                    mss=mss+' |'
+###                for jj in range(15,18):
+###                    mss=mss+' '+line.split()[jj]
+###                index=int(line.split()[0])-1
+###                self.labels[mss]=index
+###                self.node[index].label=mss
+###
+###        if format == 'text':
+###            line=fff.readline()
+###            line=line.replace('#','')
+###            line=line.split()
+###            num_fields=len(line)
+###            for ind in range(num_fields):
+###                if line[ind]=='index':
+###                    nind=ind
+###                if line[ind]=='label':
+###                    nlab=ind
+###            for line in fff.readlines():
+###                line=line.split()
+###                ind=int(line.pop(nind))
+###                lab=str(' ').join(line)
+###                self.node[ind].label=lab
+###                self.labels[lab]=ind
+###
+###        if len(self.labels)>self.num_nodes:
+###            print('# Some labels have no node')
+###        if len(self.labels)<self.num_nodes:
+###            print('# Some nodes have no label')
+###
+###        fff.close()
 
-        """format=[text,water]"""
+###    def write_labels (self,name_file=None,format='text'):
+###
+###        # if name_file is None:
+###        #     print('# Error: name_file required')
+###        #     pass
+###
+###        # fff=open(name_file,'w')
+###        # print('#','index','label',file=fff)
+###        # for ii in range(self.num_nodes):
+###        #     print(ii,self.node[ii].label,file=fff)
+###
+###        # fff.close()
+###
+###        pass
 
-        self.file_labels=name_file
-
-        fff=open(name_file,'r')
-
-        if format == 'water':
-            for ii in range(self.num_nodes):
-                line=fff.readline()
-                mss=line.split()[1]+' |'
-                for jj in range(2,6):
-                    mss=mss+' '+line.split()[jj]
-                    mss=mss+' |' 
-                for jj in range(6,9):
-                    mss=mss+' '+line.split()[jj]
-                    mss=mss+' |'
-                for jj in range(9,12):
-                    mss=mss+' '+line.split()[jj]
-                    mss=mss+' |'
-                for jj in range(12,15):
-                    mss=mss+' '+line.split()[jj]
-                    mss=mss+' |'
-                for jj in range(15,18):
-                    mss=mss+' '+line.split()[jj]
-                index=int(line.split()[0])-1
-                self.labels[mss]=index
-                self.node[index].label=mss
-
-        if format == 'text':
-            line=fff.readline()
-            line=line.replace('#','')
-            line=line.split()
-            num_fields=len(line)
-            for ind in range(num_fields):
-                if line[ind]=='index':
-                    nind=ind
-                if line[ind]=='label':
-                    nlab=ind
-            for line in fff.readlines():
-                line=line.split()
-                ind=int(line.pop(nind))
-                lab=str(' ').join(line)
-                self.node[ind].label=lab
-                self.labels[lab]=ind
-
-        if len(self.labels)>self.num_nodes:
-            print '# Some labels have no node'
-        if len(self.labels)<self.num_nodes:
-            print '# Some nodes have no label'
-
-
-        fff.close()
-
-    def write_labels (self,name_file=None,format='text'):
-
-        if name_file is None:
-            print '# Error: name_file required'
-            pass
-
-        fff=open(name_file,'w')
-        print >> fff,'#','index','label'
-        for ii in range(self.num_nodes):
-            print >> fff, ii,self.node[ii].label
-
-        fff.close()
-        
-
-    def write_net (self,name_file=None,format='text',pymol=False,with_index=True,with_clusters=False, with_atts=False):
-
-        if name_file is None:
-            print '# Error: name_file required'
-            pass
-
-        #todo: check if the file exists
-        
-        if format=='native':
-
-            fff=open(name_file,'w')
-
-            print >> fff, self.num_nodes, self.k_max, self.k_total
-
-            for ii in range(self.num_nodes):
-                aux=[]
-                aux.append(ii+1)
-                aux.append(self.node[ii].k_out)
-                aux.append(self.node[ii].weight)
-                if ii in self.node[ii].link.keys():
-                    aux.append(ii+1)
-                    aux.append(self.node[ii].link[ii])
-                for jj in self.node[ii].link.keys():
-                    if jj!=ii:
-                        aux.append(jj+1)
-                        aux.append(self.node[ii].link[jj])
-                aux=str(aux).replace(',','')
-                aux=aux.replace('[','')
-                aux=aux.replace(']','')
-                print >> fff,aux
-
-            fff.close()
-
-        elif format=='text':
-
-            io=cl_io()
-            io.v['num_nodes']=self.num_nodes
-            io.v['with_index']=with_index
-            io.v['directed']=self.directed
-            io.v['kinetic']=self.kinetic
-
-            fff=open(name_file,'w')
-
-            header=[]
-            if io.v['with_index']:
-                header.append('num_nodes='+str(self.num_nodes))
-                header.append('with_index='+str(with_index))
-            header.append('directed='+str(self.directed))
-            if io.v['kinetic']:
-                header.append('kinetic='+str(self.kinetic))
-            print >> fff, '@ ',', '.join(header)
-
-            io.v['with_weight']=True
-            io.v['with_coors']=False
-            io.v['with_cluster']=with_clusters
-            io.v['with_color']=False
-            io.v['with_size']=False
-            io.v['with_atts']=False
-
-            if pymol:
-                io.v['with_coors']=True
-                io.v['with_cluster']=True
-                io.v['with_atts']=True
-
-            line=[]
-            line.append('node')
-            if io.v['with_weight']: line.append('weight')
-            if io.v['with_cluster']: line.append('cluster')
-            if io.v['with_size']: line.append('size')
-            if io.v['with_color']: line.append('color')
-            if io.v['with_coors']: line.append('coorx'); line.append('coory'); line.append('coorz')
-            if io.v['with_atts']: line.append('att1')
-            print >> fff,'# ',' '.join(line)
-
-            for ii in range(self.num_nodes):
-                line=[]
-                node=self.node[ii]
-                if io.v['with_index']:
-                    line.append(str(ii))
-                else:
-                    line.append(node.label)
-                if io.v['with_weight']: line.append(str(node.weight))
-                if io.v['with_cluster']: line.append(str(node.cluster))
-                if io.v['with_size']: line.append(str(node.size))
-                if io.v['with_color']: line.append(str(node.color))
-                if io.v['with_coors']:
-                    line.append('  ')
-                    aux=[0.0,0.0,0.0]
-                    for jj in range(len(node.coors)):
-                        aux[jj]=node.coors[jj]
-                    for jj in aux: line.append(str(jj))
-                if io.v['with_atts']: line.append(str(node.att1))
-                print >> fff,' '.join(line)
-            
-            print >> fff,' '
-            print >> fff,'# node node weight'
-            
-            for ii in range(self.num_nodes):
-                for (jj,v) in self.node[ii].link.iteritems():
-                    line=[]
-                    if io.v['with_index']:
-                        line.append(str(ii))
-                        line.append(str(jj))
-                    else:
-                        line.append(self.node[ii].label)
-                        line.append(self.node[jj].label)
-                    line.append(str(v))
-                    print >> fff,' '.join(line)
-            
-            del(io)
-            fff.close()
-            
-
-
+###    def write_net (self,name_file=None,format='text',pymol=False,with_index=True,with_clusters=False, with_atts=False):
+###
+###        if name_file is None:
+###            print('# Error: name_file required')
+###            pass
+###
+###        #todo: check if the file exists
+###
+###        if format=='native':
+###
+###            fff=open(name_file,'w')
+###
+###            print >> fff, self.num_nodes, self.k_max, self.k_total
+###
+###            for ii in range(self.num_nodes):
+###                aux=[]
+###                aux.append(ii+1)
+###                aux.append(self.node[ii].k_out)
+###                aux.append(self.node[ii].weight)
+###                if ii in self.node[ii].link.keys():
+###                    aux.append(ii+1)
+###                    aux.append(self.node[ii].link[ii])
+###                for jj in self.node[ii].link.keys():
+###                    if jj!=ii:
+###                        aux.append(jj+1)
+###                        aux.append(self.node[ii].link[jj])
+###                aux=str(aux).replace(',','')
+###                aux=aux.replace('[','')
+###                aux=aux.replace(']','')
+###                print >> fff,aux
+###
+###            fff.close()
+###
+###        elif format=='text':
+###
+###            io=cl_io()
+###            io.v['num_nodes']=self.num_nodes
+###            io.v['with_index']=with_index
+###            io.v['directed']=self.directed
+###            io.v['kinetic']=self.kinetic
+###
+###            fff=open(name_file,'w')
+###
+###            header=[]
+###            if io.v['with_index']:
+###                header.append('num_nodes='+str(self.num_nodes))
+###                header.append('with_index='+str(with_index))
+###            header.append('directed='+str(self.directed))
+###            if io.v['kinetic']:
+###                header.append('kinetic='+str(self.kinetic))
+###            print >> fff, '@ ',', '.join(header)
+###
+###            io.v['with_weight']=True
+###            io.v['with_coors']=False
+###            io.v['with_cluster']=with_clusters
+###            io.v['with_color']=False
+###            io.v['with_size']=False
+###            io.v['with_atts']=False
+###
+###            if pymol:
+###                io.v['with_coors']=True
+###                io.v['with_cluster']=True
+###                io.v['with_atts']=True
+###
+###            line=[]
+###            line.append('node')
+###            if io.v['with_weight']: line.append('weight')
+###            if io.v['with_cluster']: line.append('cluster')
+###            if io.v['with_size']: line.append('size')
+###            if io.v['with_color']: line.append('color')
+###            if io.v['with_coors']: line.append('coorx'); line.append('coory'); line.append('coorz')
+###            if io.v['with_atts']: line.append('att1')
+###            print >> fff,'# ',' '.join(line)
+###
+###            for ii in range(self.num_nodes):
+###                line=[]
+###                node=self.node[ii]
+###                if io.v['with_index']:
+###                    line.append(str(ii))
+###                else:
+###                    line.append(node.label)
+###                if io.v['with_weight']: line.append(str(node.weight))
+###                if io.v['with_cluster']: line.append(str(node.cluster))
+###                if io.v['with_size']: line.append(str(node.size))
+###                if io.v['with_color']: line.append(str(node.color))
+###                if io.v['with_coors']:
+###                    line.append('  ')
+###                    aux=[0.0,0.0,0.0]
+###                    for jj in range(len(node.coors)):
+###                        aux[jj]=node.coors[jj]
+###                    for jj in aux: line.append(str(jj))
+###                if io.v['with_atts']: line.append(str(node.att1))
+###                print >> fff,' '.join(line)
+###            
+###            print >> fff,' '
+###            print >> fff,'# node node weight'
+###            
+###            for ii in range(self.num_nodes):
+###                for (jj,v) in self.node[ii].link.iteritems():
+###                    line=[]
+###                    if io.v['with_index']:
+###                        line.append(str(ii))
+###                        line.append(str(jj))
+###                    else:
+###                        line.append(self.node[ii].label)
+###                        line.append(self.node[jj].label)
+###                    line.append(str(v))
+###                    print >> fff,' '.join(line)
+###            
+###            del(io)
+###            fff.close()
+###            
 
 
 ############## FUNCTIONS FOR NETWORKS
@@ -763,7 +761,7 @@ class Network():
                         scratch[ii]=self.node[ii].weight
 
             if cumul==False:
-                print 'option not implemented'
+                print('option not implemented')
 
         xx,yy=LocalMath.Histo1D(scratch,range=range,num_bins=bins,norm=norm)
         
@@ -801,7 +799,7 @@ class Network():
     def prueba_fpt (self,length=None):
 
         if length is None:
-            print '# length needed.'
+            print('# length needed.')
             pass
 
         if self.Ts==False :
@@ -824,7 +822,7 @@ class Network():
     def brownian_walker (self,origin=0,length=None,self_links=True):
 
         if length is None:
-            print '# length needed.'
+            print('# length needed.')
             pass
 
         if self.Ts==False :
@@ -872,7 +870,7 @@ class Network():
 
             self.build_Ts
 
-        print 'aqui'
+        print('aqui')
         eigenvals_r, eigenvals_i, eigenvects = libs.net.relaxation_modes(num_eigenvals,self.T_start,self.T_ind,self.T_wl
                                                                          ,self.num_nodes,self.k_total)
 
@@ -900,7 +898,7 @@ class Network():
     def weight_core(self,threshold=None,new=False,verbose=False):
 
         if threshold is None:
-            print '# threshold needed.'
+            print('# threshold needed.')
             return
 
         if self.Ts==False:
@@ -1072,9 +1070,7 @@ class Network():
 
         # Output: self.clust_info, self.representants, self.node_belongs2, self.cluster_weight, self.num_clusters
         if verbose:
-            print '# Number of clusters: ',self.num_clusters
-
-
+            print('# Number of clusters: ',self.num_clusters)
 
     def gradient_clusters(self,verbose=True):
 
@@ -1122,7 +1118,7 @@ class Network():
 
         # Output: self.clust_info, self.representants, self.node_belongs2, self.cluster_weight, self.num_clusters
         if verbose:
-            print '# Number of clusters: ',self.num_clusters
+            print('# Number of clusters: ',self.num_clusters)
 
     def clusters_links(self,verbose=True):
 
@@ -1132,7 +1128,7 @@ class Network():
 
         if self.num_clusters < 2:
 
-            print '#Error: Number of clusters lower than 2'
+            print('#Error: Number of clusters lower than 2')
             return
 
         for ii in xrange(self.num_clusters):
@@ -1163,7 +1159,7 @@ class Network():
         libs.net.dendo_time(steps,self.num_clusters,belongsto,self.T_ind,self.T_wl,self.T_start,self.num_nodes,self.k_total)
 
         del(belongsto)
-        print '# Done'
+        print('# Done')
         return
 
     def dendo_bottom_up(self,verbose=True):
@@ -1181,7 +1177,7 @@ class Network():
         libs.net.dendo_bottom_up(self.num_clusters,belongsto,self.T_ind,self.T_wl,self.T_start,self.num_nodes,self.k_total)
 
         del(belongsto)
-        print '# Done'
+        print('# Done')
         return
 
     def dendo_by_nodes(self,verbose=True):
@@ -1199,7 +1195,7 @@ class Network():
         libs.net.dendo_by_nodes(self.num_clusters,belongsto,self.T_ind,self.T_wl,self.T_start,self.num_nodes,self.k_total)
 
         del(belongsto)
-        print '# Done'
+        print('# Done')
         return
 
 
@@ -1314,12 +1310,12 @@ class Network():
         for ii in xrange(self.num_nodes):
             oldcoors[:,ii]=self.node[ii].coors[:]
 
-        print '1'
+        print('1')
         libs.mds.load_net(self.T_start,self.T_ind,self.T_wl,self.num_nodes,self.k_total)
-        print '2'
+        print('2')
         libs.mds.cargo_distancias(distancias,self.num_nodes)
 
-        print '3'
+        print('3')
         newcoors=libs.mds.majorization(tipo,oldcoors,self.num_nodes)
 
         for ii in xrange(self.num_nodes):
@@ -1352,10 +1348,10 @@ class Network():
             if eigenvs in ['all','All']:
                 eigenvs=self.num_nodes
             if eigenvs>self.num_nodes:
-                print '# Error: eigenvs>num_nodes'
+                print('# Error: eigenvs>num_nodes')
                 return 
             if dim>eigenvs:
-                print '# Error: dim>eigenvs'
+                print('# Error: dim>eigenvs')
                 return
 
             opt_stress=0
@@ -1384,10 +1380,10 @@ class Network():
                     elif tipo==4:
                         libs.mds.pre_inv_flux()
 
-                    print 'elije'
+                    print('elije')
                     if pivots in ['random','Random','RANDOM']:
                         list_pivots=libs.mds.choose_random_pivots_1(num_pivots)
-                        print 'dijkstra_pivots'
+                        print('dijkstra_pivots')
                         libs.mds.dijkstra_pivots()
                         dxd=deepcopy(libs.mds.dists)
                     if pivots in ['random2','Random2','RANDOM2']:
@@ -1402,10 +1398,10 @@ class Network():
                     if eigenvs in ['all','All']:
                         eigenvs=self.num_nodes
                     if eigenvs>self.num_nodes:
-                        print '# Error: eigenvs>num_nodes'
+                        print('# Error: eigenvs>num_nodes')
                         return 
                     if dim>eigenvs:
-                        print '# Error: dim>eigenvs'
+                        print('# Error: dim>eigenvs')
                         return
 
                     opt_stress=0
@@ -1416,7 +1412,7 @@ class Network():
                     o_coors=libs.mds.mds_pivots(dim,self.num_nodes)
 
                 else:
-                    print '# Error: num_pivots required'
+                    print('# Error: num_pivots required')
                     return
 
         for ii in range(self.num_nodes):
@@ -1439,10 +1435,10 @@ class Network():
         if eigenvs in ['all','All']:
             eigenvs=self.num_nodes
         if eigenvs>self.num_nodes:
-            print '# Error: eigenvs>num_nodes'
+            print('# Error: eigenvs>num_nodes')
             return 
         if dim>eigenvs:
-            print '# Error: dim>eigenvs'
+            print('# Error: dim>eigenvs')
             return
 
         if distances is None: #Just to fill the variable
@@ -1501,25 +1497,25 @@ class Network():
                     for ii in range(self.num_nodes):
                         for jj,kk in self.node[ii].link.iteritems():
                             if not jj<ii:
-                                print >> fff, ii,jj,kk
+                                print(ii,jj,kk,file=fff)
                     fff.close()
                 else:
                     fff=open('.input_mcl','w')
                     for ii in range(self.num_nodes):
                         for jj,kk in self.node[ii].link.iteritems():
-                            print >> fff, ii,jj,kk
+                            print(ii,jj,kk,file=fff)
                     fff.close()
 
                 # Check whether mcl exists
                 if system("type mcl > /dev/null") != 0:
-                    print "# Error. Can't find mcl (Markov Cluster Algorithm)."
+                    print("# Error. Can't find mcl (Markov Cluster Algorithm).")
                     exit()
 
                 comando='mcl .input_mcl --abc -I '+str(granularity)+' -o .output_mcl > /dev/null 2>&1'
                 salida=system(comando)
 
                 if salida!=0:
-                    print '# Error'
+                    print('# Error')
                     exit()
                 
                 fff=open('.output_mcl','r')
@@ -1600,7 +1596,7 @@ class Network():
 
         # Output: self.clust_info, self.representants, self.node_belongs2, self.cluster_weight, self.num_clusters
         if verbose:
-            print '# Number of clusters: ',self.num_clusters
+            print('# Number of clusters: ',self.num_clusters)
 
         pass
 
@@ -1663,7 +1659,7 @@ class Network():
 
 
         if verbose:
-            print '# Number of components: ',self.num_components
+            print('# Number of components: ',self.num_components)
 
         pass
 
@@ -1713,7 +1709,7 @@ class Network():
         del(Comp)
 
         if verbose:
-            print '# Nodes in the giant component: ', gc_num_nodes
+            print('# Nodes in the giant component: ', gc_num_nodes)
 
         return gc_nodes
 
@@ -1726,6 +1722,14 @@ class Network():
             for node in self.node:
                 node.coors=LocalMath.NumpyStr2NumpyArray(node.label)
         pass
+
+
+
+class KineticNetwork(Network):
+    pass
+
+class PotentialEnergyNetwork(Network):
+    pass
 
 #### External Functions
 
@@ -1802,7 +1806,7 @@ def kinetic_network(traj=None,ranges=None,bins=None,traj_out=False,labels=True,v
         if type(bins) in [int]:
             bins=[bins]
         if len(bins)!=dimensions:
-            print '# The length of bins must be equal to the length of ranges'
+            print('# The length of bins must be equal to the length of ranges')
             return
         bins=np.array(bins,dtype=int,order='F')
         traj_net=LocalKin.trajbinning2net(opt_labels,traj,ranges,bins,num_frames,num_parts,dimensions)
@@ -1861,7 +1865,7 @@ def kinetic_network_list(traj=None,ranges=None,bins=None,traj_out=False,labels=T
         if type(bins) in [int]:
             bins=[bins]
         if len(bins)!=dimensions:
-            print '# The length of bins must be equal to the length of ranges'
+            print('# The length of bins must be equal to the length of ranges')
             return
         bins=np.array(bins,dtype=int,order='F')
         traj_net=LocalKin.trajbinning2net(opt_labels,traj,ranges,bins,num_frames,num_parts,dimensions)

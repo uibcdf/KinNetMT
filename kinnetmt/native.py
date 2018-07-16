@@ -1,139 +1,19 @@
-import lib as libs
-import .utils/LocalMath as LocalMath
-import .utils/LocalKin as LocalKin
-import numpy as np
-from copy import deepcopy
-from os import system
-from sys import exit
-# import subprocess
+#import lib as libs
+#import .utils/LocalMath as LocalMath
+#import .utils/LocalKin as LocalKin
+#import numpy as np
+#from copy import deepcopy
+#from os import system
+#from sys import exit
 
 #####################################################################################
 ##### Networks
 #####################################################################################
 
-class cl_io():
-
-    def __init__(self):
-
-        self.v={}
-        self.reset_H1()
-        self.reset_H2()
-        pass
-    
-    def reset_H1(self):        
-        self.v['num_nodes']=0
-        self.v['with_index']=False
-        self.v['directed']=False
-        self.v['kinetic']=False
-
-    def reset_H2(self):
-
-        self.l=[]
-        self.v['num_fields']=0
-        self.v['with_node1']=False
-        self.v['with_links']=False
-        self.v['with_weight']=False
-        self.v['with_coors']=False
-        self.v['with_cluster']=False
-        self.v['with_color']=False
-        self.v['with_size']=False
-        self.v['with_atts']=False
-
-        self.v['node1']=0
-        self.v['node2']=0
-        self.v['weight']=0
-        self.v['cluster']=0
-        self.v['coorx']=0.00
-        self.v['coory']=0.00
-        self.v['coorz']=0.00
-        self.v['color']=''
-        self.v['size']=0.00
-        self.v['att1']=0
-
-
-    def read_H1(self,line):
-        line=line.replace('@',''); line=line.replace(',',' ')
-        line=line.split()
-        for field in line:
-            att,opt=field.split('=')
-            if att in ['directed','with_index','kinetic']:
-                if opt in ['True','true']:
-                    self.v[att]=True
-                elif opt in ['False','false']:
-                    self.v[att]=False
-                else:
-                    raise Exception('#Error in attribute of network: '+opt)
-            elif att in ['num_nodes']:
-                self.v[att]=int(opt)
-            else:
-                raise Exception('# Option in file not recognized: '+att)
-
-
-    def read_H2(self,line):
-        self.reset_H2()
-        line=line.replace('#','')
-        line=line.split()
-        self.v['num_fields']=len(line)
-        for ind in range(self.v['num_fields']):
-            if line[ind] == 'node':
-                if self.v['with_node1']:
-                    self.l.append('node2')
-                    self.v['node2']=ind
-                    self.v['with_links']=True
-                else:
-                    self.l.append('node1')
-                    self.v['node1']=ind
-                    self.v['with_node1']=True
-            elif line[ind] in self.v.keys():
-                self.v[line[ind]]=ind
-                self.l.append(line[ind])
-                if line[ind] in ['coorx','coory','coorz']: self.v['with_coors']=True
-                if line[ind] in ['cluster']: self.v['with_cluster']=True
-                if line[ind] in ['color']: self.v['with_color']=True
-                if line[ind] in ['size']: self.v['with_size']=True
-                if line[ind] in ['weight']: self.v['with_weight']=True
-                if line[ind] in ['att1']: self.v['with_atts']=True
-
-    def read_line(self,line):
-        
-        line=line.split()
-        if len(line)==self.v['num_fields']:
-            control=True
-            for ind in range(self.v['num_fields']):
-                self.v[self.l[ind]]=line[ind]
-            if self.v['with_index']: 
-                self.v['node1']=int(self.v['node1'])
-                self.v['node2']=int(self.v['node2'])
-            if self.v['with_weight']:
-                self.v['weight']=float(self.v['weight'])
-            if self.v['with_cluster']: self.v['cluster']=int(self.v['cluster'])
-            if self.v['with_size']: self.v['size']=float(self.v['size'])
-            if self.v['with_coors']:
-                self.v['coorx']=float(self.v['coorx'])
-                self.v['coory']=float(self.v['coory'])
-                self.v['coorz']=float(self.v['coorz'])
-            if self.v['with_atts']: self.v['att1']=str(self.v['att1'])
-        else:
-            control=False
-
-        return control
-
 class cl_node():
-    """ Fundamental unit to constitute a network together with links.
 
-        Attr:
-               label   [string] :    label or key
-               weight  [int]    :    weight
-               link    [dict]   :    
-
-    """
     def __init__(self):
-#        """Attributes:
-#        
-#           label[string]: label or key
-#           weight[int]: weight
-#           
-#        """
+
         self.label=''
         self.link={}
         self.alt_link={}
@@ -152,7 +32,7 @@ class cl_node():
 
     def most_weighted_links(self,length=1):
         """ Indexes **of** the ranked N most weighted links.
-        
+
         :param length: number of links
         :type length: integer
         :return: array of node indexes
@@ -204,13 +84,13 @@ class Network():
         self.weight=0
         self.labels={}
         self.clustering_method=' '
-        self.directed=True
+        self.directed=False
         self.kinetic=False
         self.coors=None
 
         self.file_net=None
         self.file_labels=None
- 
+
         self.__symmetric__=False
 
         pass
@@ -221,11 +101,11 @@ class Network():
         self.T_ind=[]
         self.T_start=[]
         self.T_wl=[]
-        self.T_wn=[]        
+        self.T_wn=[]
 
         pass
 
-    def __init__(self,timeseries=None,file_net=None,file_labels=None,net_format='text',labels_format='text',directed=True,kinetic=False,verbose=True):
+    def __init__(self, timeseries=None, file_net=None, file_labels=None, net_format='text', labels_format='text', directed=False, kinetic=False, verbose=True):
 
         self.__init_att__()
         self.__init_Ts__()
@@ -244,7 +124,7 @@ class Network():
 
         pass
 
-        
+
     def info(self,update=True,verbose=True):
 
         if update:
@@ -324,7 +204,7 @@ class Network():
                 self.node[nf].link[no]+=weight
             except:
                 self.node[nf].link[no]=weight
-        
+
         if iout:
             return no, nf
 
@@ -362,12 +242,12 @@ class Network():
         else:
 
             self.info(verbose=False)
-            
+
             self.T_ind=np.zeros(shape=(self.k_total),dtype=int,order='Fortran')
             self.T_start=np.zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
             self.T_wl=np.zeros(shape=(self.k_total),dtype=float,order='Fortran')
             self.T_wn=np.zeros(shape=(self.num_nodes),dtype=float,order='Fortran')
-            
+
             kk=0
             for ii in range(self.num_nodes):
                 self.T_wn[ii]=self.node[ii].weight
@@ -409,9 +289,9 @@ class Network():
         pass
 
     def merge_net(self,net=None,traj=None,verbose=True):
-         
+
         # merging the labels and weights of nodes
-         
+
         net_to_total=np.zeros(net.num_nodes,dtype=int)
         labels_aux=deepcopy(self.labels)
         for ii in xrange(net.num_nodes):
@@ -423,7 +303,7 @@ class Network():
             net_to_total[ii]=no
 
         # merging the links
-         
+
         for no in range(net.num_nodes):
             no2=net_to_total[no]
             for nf,wf in net.node[no].link.iteritems():
@@ -476,9 +356,9 @@ class Network():
 
 
     def extract_net(self,nodes=None,verbose=True):
-        
+
         nodes=np.array(nodes,dtype=int)
-        
+
         if self.Ts==False:
             self.build_Ts()
 
@@ -841,7 +721,6 @@ class Network():
 
 
 ############## FUNCTIONS FOR NETWORKS
-
 
     def k_distribution (self, option='out', bins=20, range=None,norm=None):
 
@@ -1485,8 +1364,6 @@ class Network():
                 opt_stress=1
 
             o_coors,o_eigenvals,o_eigenvects,o_stress=libs.mds.mds(opt_stress,dim,eigenvs,self.num_nodes)
-
-            
 
         else:
 

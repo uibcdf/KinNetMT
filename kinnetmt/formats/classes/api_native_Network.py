@@ -1,5 +1,5 @@
 from os.path import basename as _basename
-from molsysmt.native import Network as _native_Network
+from kinnetmt.native import Network as _native_Network
 
 form_name=_basename(__file__).split('.')[0].replace('api_','').replace('_','.')
 

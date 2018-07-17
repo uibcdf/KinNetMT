@@ -105,12 +105,15 @@ class Network():
 
         pass
 
-    def __init__(self, timeseries=None, file_net=None, file_labels=None, net_format='text', labels_format='text', directed=False, kinetic=False, verbose=True):
+    def __init__(self, timeseries=None, form=None, file_net=None, file_labels=None, net_format='text', labels_format='text', directed=False, kinetic=False, verbose=True):
 
         self.__init_att__()
         self.__init_Ts__()
         self.directed=directed
         self.kinetic=kinetic
+
+        if form is not None:
+            print('cargar')
 
         if file_net!=None:
             self.load_net(file_net,net_format,verbose)

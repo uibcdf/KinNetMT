@@ -52,7 +52,7 @@ def get_form(item=None):
         except:
             raise NotImplementedError("This item's form has not been implemented yet")
 
-def load (item=None,form='native.Native'):
+def load (item=None,form='native.Network'):
 
     return convert(item,form)
 

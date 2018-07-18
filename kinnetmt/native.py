@@ -6,6 +6,7 @@
 #from os import system
 #from sys import exit
 
+
 #####################################################################################
 ##### Networks
 #####################################################################################
@@ -105,25 +106,27 @@ class Network():
 
         pass
 
-    def __init__(self, timeseries=None, form=None, file_net=None, file_labels=None, net_format='text', labels_format='text', directed=False, kinetic=False, verbose=True):
+    def __init__(self, timeseries=None, item=None, file_net=None, file_labels=None,
+                 net_format='text', labels_format='text', directed=False, kinetic=False,
+                 verbose=False):
 
         self.__init_att__()
         self.__init_Ts__()
         self.directed=directed
         self.kinetic=kinetic
 
-        if form is not None:
-            print('cargar')
+        if item is not None:
+            self.load_item(item)
 
-        if file_net!=None:
-            self.load_net(file_net,net_format,verbose)
-            if file_labels!=None:
-                self.load_labels(file_labels,labels_format)
-        elif timeseries!=None:
-            self.load_net_from_timeseries(file_net,net_format,verbose)
-        else:
-            if verbose:
-                self.info()
+        #if file_net!=None:
+        #    self.load_net(file_net,net_format,verbose)
+        #    if file_labels!=None:
+        #        self.load_labels(file_labels,labels_format)
+        #elif timeseries!=None:
+        #    self.load_net_from_timeseries(file_net,net_format,verbose)
+
+        if verbose:
+            self.info()
 
         pass
 
@@ -421,6 +424,16 @@ class Network():
     #    self.kinetic=True
     #    self.directed=True
 
+    def load_item(self,item):
+
+        from .multitool import get_form as _get_form
+        type_form=_get_form(item)
+
+        if type_form=='networkx.Graph':
+            for node in item:
+                self.add_node(label=node)
+            for edges in item.edges:
+                self.add_link(edges[0],edges[1])
 
     def load_net(self,name_file,format='text',verbose=True):
         """format:['text','native']"""

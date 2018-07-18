@@ -11,7 +11,7 @@ is_form={
 
 def to_native_Network(item):
     from kinnetmt.native import Network as _native_Network
-    return _native_Network(form=item)
+    return _native_Network(item=item)
 
 def to_native_KineticNetwork(item):
     pass

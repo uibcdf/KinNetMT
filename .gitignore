@@ -6,3 +6,4 @@ INSTALL.log
 *.pyc
 record.txt
 *.ipynb_checkpoints
+build/*

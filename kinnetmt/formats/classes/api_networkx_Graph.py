@@ -17,4 +17,6 @@ def to_native_KineticNetwork(item):
     pass
 
 def to_native_PotentialEnergyNetwork(item):
+    from kinnetmt.native import PotentialEnergyNetwork as _native_PotentialEnergyNetwork
+    return _native_PotentialEnergyNetwork(item=item)
     pass

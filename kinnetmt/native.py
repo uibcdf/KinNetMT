@@ -1,3 +1,6 @@
+from numpy import zeros as _np_zeros, exp as _np_exp
+from .lib.potential_energy import glob as _lib_potential_energy
+
 #import lib as libs
 #import .utils/LocalMath as LocalMath
 #import .utils/LocalKin as LocalKin
@@ -27,9 +30,7 @@ class cl_node():
         self.coors=None
         self.color=''
         self.size=''
-        self.att1=0
-        self.att2=0
-        self.att3=0
+        self.attribute={}
 
     def most_weighted_links(self,length=1):
         """ Indexes **of** the ranked N most weighted links.
@@ -87,6 +88,7 @@ class Network():
         self.clustering_method=' '
         self.directed=False
         self.kinetic=False
+        self.potential_energy=False
         self.coors=None
 
         self.file_net=None
@@ -107,13 +109,13 @@ class Network():
         pass
 
     def __init__(self, timeseries=None, item=None, file_net=None, file_labels=None,
-                 net_format='text', labels_format='text', directed=False, kinetic=False,
-                 verbose=False):
+                 net_format='text', labels_format='text', directed=False, verbose=False):
 
         self.__init_att__()
         self.__init_Ts__()
         self.directed=directed
-        self.kinetic=kinetic
+        self.kinetic=False
+        self.potential_energy=False
 
         if item is not None:
             self.load_item(item)
@@ -153,13 +155,19 @@ class Network():
         if verbose:
 
             print ('# Network:')
+            if self.potential_energy:
+                print('# PotentialEnergyNetwork')
+            if self.kinetic:
+                print('# KineticNetwork')
             print ('#', self.num_nodes, 'nodes')
             print ('#', self.k_total, 'links out')
-            print ('#', self.weight, 'total weight nodes')
+            print ('#', list(self.node[0].attribute.keys()),'additional node attributes')
+            if self.kinetic:
+                print('#',self.weight,'total weight')
 
         pass
 
-    def add_node(self, label=None, weight=0,iout=False):
+    def add_node(self, label=None, weight=0, attribute=None, iout=False):
         """Description add node"""
 
         node=cl_node()
@@ -172,7 +180,11 @@ class Network():
             node.label=str(label)
             self.labels[node.label]=no
 
+        if attribute is not None:
+            node.attribute=attribute
+
         self.node.append(node)
+        del(node)
 
         if iout:
             return no
@@ -224,9 +236,9 @@ class Network():
             for ii in self.node:
                 alt_k_total+=len(ii.alt_link[ii])
 
-            alt_T_ind=np.zeros(shape=(alt_k_total),dtype=int,order='Fortran')
-            alt_T_start=np.zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
-            alt_T_wl=np.zeros(shape=(alt_k_total),dtype=float,order='Fortran')
+            alt_T_ind=_np_zeros(shape=(alt_k_total),dtype=int,order='Fortran')
+            alt_T_start=_np_zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
+            alt_T_wl=_np_zeros(shape=(alt_k_total),dtype=float,order='Fortran')
 
             kk=0
             for ii in range(self.num_nodes):
@@ -249,10 +261,10 @@ class Network():
 
             self.info(verbose=False)
 
-            self.T_ind=np.zeros(shape=(self.k_total),dtype=int,order='Fortran')
-            self.T_start=np.zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
-            self.T_wl=np.zeros(shape=(self.k_total),dtype=float,order='Fortran')
-            self.T_wn=np.zeros(shape=(self.num_nodes),dtype=float,order='Fortran')
+            self.T_ind=_np_zeros(shape=(self.k_total),dtype=int,order='Fortran')
+            self.T_start=_np_zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
+            self.T_wl=_np_zeros(shape=(self.k_total),dtype=float,order='Fortran')
+            self.T_wn=_np_zeros(shape=(self.num_nodes),dtype=float,order='Fortran')
 
             kk=0
             for ii in range(self.num_nodes):
@@ -298,7 +310,7 @@ class Network():
 
         # merging the labels and weights of nodes
 
-        net_to_total=np.zeros(net.num_nodes,dtype=int)
+        net_to_total=_np_zeros(net.num_nodes,dtype=int)
         labels_aux=deepcopy(self.labels)
         for ii in xrange(net.num_nodes):
             try :
@@ -431,7 +443,7 @@ class Network():
 
         if type_form=='networkx.Graph':
             for node in item:
-                self.add_node(label=node)
+                self.add_node(label=node,attribute=item.node[node])
             for edges in item.edges:
                 self.add_link(edges[0],edges[1])
 
@@ -496,9 +508,9 @@ class Network():
             k_max=int(line.split()[1])
             k_total=int(line.split()[2])
             
-            self.T_ind=np.zeros(shape=(k_total),dtype=int,order='Fortran')
-            self.T_start=np.zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
-            self.T_wl=np.zeros(shape=(k_total),dtype=float,order='Fortran')
+            self.T_ind=_np_zeros(shape=(k_total),dtype=int,order='Fortran')
+            self.T_start=_np_zeros(shape=(self.num_nodes+1),dtype=int,order='Fortran')
+            self.T_wl=_np_zeros(shape=(k_total),dtype=float,order='Fortran')
             
             data=fff.read()
 
@@ -756,7 +768,7 @@ class Network():
 
         if objects in ['nodes','Nodes']:
             """option=['all','self_links','all-self_links','links']  (I have to do the same for the links of a node)"""
-            scratch=np.zeros(self.num_nodes,dtype=float)
+            scratch=_np_zeros(self.num_nodes,dtype=float)
 
             if option=='all':
                 for ii in xrange(self.num_nodes):
@@ -867,7 +879,7 @@ class Network():
 
     def transition_matrix(self,sparse=False):
 
-        tmatrix=np.zeros((self.num_nodes,self.num_nodes))
+        tmatrix=_np_zeros((self.num_nodes,self.num_nodes))
 
         for ii in xrange(self.num_nodes):
             for jj,kk in self.node[ii].link.iteritems():
@@ -1058,7 +1070,7 @@ class Network():
 
 
         aux=np.array(Clust.keys(),dtype=int)
-        weight_clusts=np.zeros((self.num_clusters),dtype=float)
+        weight_clusts=_np_zeros((self.num_clusters),dtype=float)
         for ii in range(aux.shape[0]):
             for jj in Clust[aux[ii]]:
                 weight_clusts[ii]+=self.node[jj].weight
@@ -1106,7 +1118,7 @@ class Network():
 
 
         aux=np.array(Clust.keys(),dtype=int)
-        weight_clusts=np.zeros((self.num_clusters),dtype=float)
+        weight_clusts=_np_zeros((self.num_clusters),dtype=float)
         for ii in range(aux.shape[0]):
             for jj in Clust[aux[ii]]:
                 weight_clusts[ii]+=self.node[jj].weight
@@ -1322,7 +1334,7 @@ class Network():
 
     def distancias_majorization(self,tipo=1,distancias=None):
 
-        oldcoors=np.zeros((3,self.num_nodes),dtype=float,order='F')
+        oldcoors=_np_zeros((3,self.num_nodes),dtype=float,order='F')
         for ii in xrange(self.num_nodes):
             oldcoors[:,ii]=self.node[ii].coors[:]
 
@@ -1458,7 +1470,7 @@ class Network():
             return
 
         if distances is None: #Just to fill the variable
-            distances=np.zeros(shape=(1,1),dtype=float,order='Fortran')
+            distances=_np_zeros(shape=(1,1),dtype=float,order='Fortran')
             dim_distances=1
         else:
             dim_distances=len(distances)
@@ -1566,8 +1578,8 @@ class Network():
                         Clust[pfff[ii]].append(ii)
 
         aux=np.array(Clust.keys(),dtype=int)
-        aux_rep=np.zeros(aux.shape[0],dtype=int)
-        weight_clusts=np.zeros((self.num_clusters),dtype=float)
+        aux_rep=_np_zeros(aux.shape[0],dtype=int)
+        weight_clusts=_np_zeros((self.num_clusters),dtype=float)
         for ii in range(aux.shape[0]):
             wrep=0.0
             jjrep=0
@@ -1637,7 +1649,7 @@ class Network():
                 Comp[pfff[ii]].append(ii)
 
         aux=np.array(Comp.keys(),dtype=int)
-        weight_comps=np.zeros((self.num_components),dtype=float)
+        weight_comps=_np_zeros((self.num_components),dtype=float)
         for ii in range(aux.shape[0]):
             for jj in Comp[aux[ii]]:
                 weight_comps[ii]+=self.node[jj].weight
@@ -1695,7 +1707,7 @@ class Network():
                 Comp[pfff[ii]].append(ii)
 
         aux=np.array(Comp.keys(),dtype=int)
-        weight_comps=np.zeros((self.num_components),dtype=float)
+        weight_comps=_np_zeros((self.num_components),dtype=float)
         for ii in range(aux.shape[0]):
             for jj in Comp[aux[ii]]:
                 weight_comps[ii]+=self.node[jj].weight
@@ -1745,7 +1757,53 @@ class KineticNetwork(Network):
     pass
 
 class PotentialEnergyNetwork(Network):
-    pass
+
+    def __init__(self, item=None, file_net=None, file_labels=None,
+                 net_format='text', labels_format='text', verbose=False):
+
+        super().__init__(self, item=item, file_net=file_net, file_labels=file_labels,
+                 net_format=net_format, labels_format='text', verbose=verbose)
+
+        self.potential_energy=True
+        self.potential_energies=_np_zeros(self.num_nodes)
+        for node_index in range(self.num_nodes):
+            self.potential_energies[node_index]=self.node[node_index].attribute['Potential_Energy']
+
+        #self.set_thermodynamic_weight()
+
+    def set_thermodynamic_weight(self,temperature=None,Kb=0.0083144621,KbT=2.479): 
+        #KT a 298K = 2.479 en kJ/mol
+        #Kb es 0.0083144621 en kJ/(mol*K)
+        self.weight=0.0
+
+        if temperature is not None:
+            KbT = Kb * temperature
+
+        for node in self.node:
+            node.weight=_np_exp(-node.attribute['Potential_Energy']/KbT)
+            self.weight+=node.weight
+
+    def get_local_minima(self):
+
+        if not self.Ts:
+            self.build_Ts()
+
+        return _lib_potential_energy.local_minima_potential_energy(self.T_ind,
+                                                                   self.potential_energies,
+                                                                   self.T_start, self.num_nodes,
+                                                                   self.k_total)
+
+
+    def get_absolute_minimum(self):
+
+        #if not self.Ts:
+        #    self.build_Ts()
+
+        #_aux_val=self.T_wn.argmax()
+
+        _aux_val=self.potential_energies.argmin()
+
+        return _aux_val, self.potential_energies[_aux_val]
 
 #### External Functions
 

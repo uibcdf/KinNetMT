@@ -42,7 +42,11 @@ def get_form(item=None):
         if ':' in item:
             item=item.split(':')[0]+":id"
         else:
-            item=item.split('.')[-1]
+            item=item.split('.')
+            if len(item)<2:
+                item=item[-1]
+            else:
+                item='.'.join(item[1:])
 
     try:
         return _dict_is_form[type(item)]

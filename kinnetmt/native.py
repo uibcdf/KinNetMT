@@ -1,4 +1,4 @@
-from numpy import zeros as _np_zeros, exp as _np_exp
+from numpy import zeros as _np_zeros, exp as _np_exp, asfortranarray as _np_asfortranarray
 from .lib.potential_energy import glob as _lib_potential_energy
 
 #import lib as libs
@@ -1788,11 +1788,13 @@ class PotentialEnergyNetwork(Network):
         if not self.Ts:
             self.build_Ts()
 
-        return _lib_potential_energy.local_minima_potential_energy(self.T_ind,
-                                                                   self.potential_energies,
-                                                                   self.T_start, self.num_nodes,
-                                                                   self.k_total)
-
+        tmp_filter = _lib_potential_energy.local_minima_potential_energy(self.T_ind,
+                                                                      self.potential_energies,
+                                                                       self.T_start, self.num_nodes,
+                                                                       self.k_total)
+        tmp_array = tmp_filter.nonzero()[0]
+        del(tmp_filter)
+        return tmp_array
 
     def get_absolute_minimum(self):
 
@@ -1804,6 +1806,19 @@ class PotentialEnergyNetwork(Network):
         _aux_val=self.potential_energies.argmin()
 
         return _aux_val, self.potential_energies[_aux_val]
+
+    def get_landscape_bottom_up(self):
+
+
+        nodes_index_bottom_up = _np_asfortranarray(net.potential_energies.argsort()+1)
+
+        react_coor_x =_lib_potential_energy.landscape_pes_bottom_up(self.T_ind,
+                                                                    self.potential_energies,
+                                                                    self.T_start,
+                                                                    nodes_index_bottom_up,
+                                                                    self.num_nodes, self.k_total)
+
+        pass
 
 #### External Functions
 

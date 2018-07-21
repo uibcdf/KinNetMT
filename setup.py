@@ -6,6 +6,7 @@ from numpy.distutils.extension import Extension
 
 ext_potential_energy_network = Extension(
     name = 'kinnetmt.lib.potential_energy',
+    #extra_compile_args = ["-fcheck=all"],
     extra_compile_args = [],
     libraries = [],
     language = 'f90',

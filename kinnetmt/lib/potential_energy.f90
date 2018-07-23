@@ -161,17 +161,19 @@ SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up,
 
             IF ( switch == -1) THEN
 
-                xx = lim_inf(aux_index_group) - 1
-                lim_inf(aux_index_group) = xx
+                xx = lim_inf(aux_index_group)
+                react_coor_x(next_node) = xx - 1
+                lim_inf(aux_index_group) = react_coor_x(next_node)
+                xx = lim_inf(aux_index_group)
 
             ELSE
 
-                xx = lim_sup(aux_index_group) + 1
-                lim_sup(aux_index_group) = xx
+                xx = lim_sup(aux_index_group)
+                react_coor_x(next_node) = xx + 1
+                lim_sup(aux_index_group) = react_coor_x(next_node)
+                xx = lim_sup(aux_index_group) 
 
             END IF
-
-            react_coor_x(next_node) = xx
 
             IF (n_linked_groups > 1) THEN
 
@@ -202,10 +204,11 @@ SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up,
                             oo = lim_sup(group_to_lump)
                             DO kk = 1,nn
                                 ll = group(group_to_lump)%ip(kk)
-                                react_coor_x(ll) = react_coor_x(ll) - oo + xx - 1
+                                react_coor_x(ll) = react_coor_x(ll) - ( oo - (xx - 1))
                             END DO
 
                             lim_inf(aux_index_group) = lim_inf(aux_index_group) - nn 
+                            xx = lim_inf(aux_index_group)
 
                         ELSE
 
@@ -213,10 +216,11 @@ SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up,
 
                             DO kk = 1,nn
                                 ll = group(group_to_lump)%ip(kk)
-                                react_coor_x(ll) = react_coor_x(ll) + oo + xx + 1
+                                react_coor_x(ll) = react_coor_x(ll) + ( (xx +1) - oo )
                             END DO
 
                             lim_sup(aux_index_group) = lim_sup(aux_index_group) + nn
+                            xx = lim_sup(aux_index_group)
 
                         END IF
 

@@ -1809,6 +1809,8 @@ class PotentialEnergyNetwork(Network):
 
     def get_landscape_bottom_up(self):
 
+        if not self.Ts:
+            self.build_Ts()
 
         nodes_index_bottom_up = _np_asfortranarray(self.potential_energies.argsort()+1)
 
@@ -1817,7 +1819,7 @@ class PotentialEnergyNetwork(Network):
                                                                     self.T_start,
                                                                     nodes_index_bottom_up,
                                                                     self.num_nodes, self.k_total)
-
+        del(nodes_index_bottom_up)
         return react_coor_x
 
         pass

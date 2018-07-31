@@ -1824,6 +1824,10 @@ class PotentialEnergyNetwork(Network):
 
         pass
 
+    def get_potential_energy_basins(self):
+
+        pass
+
 #### External Functions
 
 #def traj2net(filename=None,num_particles=0,num_frames=0,output=None):

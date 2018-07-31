@@ -1767,11 +1767,11 @@ class PotentialEnergyNetwork(Network):
         self.potential_energy=True
         self.potential_energies=_np_zeros(self.num_nodes)
         for node_index in range(self.num_nodes):
-            self.potential_energies[node_index]=self.node[node_index].attribute['Potential_Energy']
+            self.potential_energies[node_index]=self.node[node_index].attribute['Potential_Energy']._value
 
         #self.set_thermodynamic_weight()
 
-    def set_thermodynamic_weight(self,temperature=None,Kb=0.0083144621,KbT=2.479): 
+    def set_thermodynamic_weight(self,temperature=None,Kb=0.0083144621,KbT=2.479):
         #KT a 298K = 2.479 en kJ/mol
         #Kb es 0.0083144621 en kJ/(mol*K)
         self.weight=0.0

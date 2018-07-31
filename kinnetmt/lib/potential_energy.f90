@@ -43,6 +43,56 @@ SUBROUTINE LOCAL_MINIMA_POTENTIAL_ENERGY (T_ind,T_pe,T_start,N_nodes,Ktot,Is_Min
 END SUBROUTINE LOCAL_MINIMA_POTENTIAL_ENERGY
 
 
+SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, belongs_to_basin)
+
+    IMPLICIT NONE
+
+    TYPE int_pointer
+        INTEGER,DIMENSION(:),POINTER::ip
+    END TYPE int_pointer
+
+    TYPE double_pointer
+        DOUBLE PRECISION,DIMENSION(:),POINTER::dp
+    END TYPE double_pointer
+
+    INTEGER,INTENT(IN)::N_nodes,Ktot
+    INTEGER,DIMENSION(Ktot),INTENT(IN)::T_ind
+    DOUBLE PRECISION,DIMENSION(N_nodes),INTENT(IN)::T_pe
+    INTEGER,DIMENSION(N_nodes+1),INTENT(IN)::T_start
+    INTEGER,DIMENSION(N_nodes),INTENT(IN)::Nodes_index_bottom_up
+
+    INTEGER,DIMENSION(N_nodes),INTENT(OUT)::belongs_to_basin
+
+    LOGICAL,DIMENSION(N_nodes):: is_local_minimum, already_visited
+
+    INTEGER::ii,jj
+    INTEGER::num_basins
+
+    is_local_minimum(:) = .FALSE.
+    already_visited(:) = .FALSE.
+    belongs_to_basin(:) = -1
+
+    DO ii=1,N_nodes
+
+        next_node = Nodes_index_bottom_up(ii)
+        next_pe   = T_pe(next_node)
+
+        n_neighbs = T_start(next_node+1)-T_start(next_node)
+        n_neighbs_down = 0
+        ALLOCATE(neighbs_down(n_neighbs))
+
+        DO jj=T_start(next_node)+1,T_start(next_node+1)
+            eval_pe = T_pe(T_ind(jj))
+            IF (eval_pe < next_pe) THEN
+                n_neighbs_down = n_neighbs_down + 1
+                neighbs_down(n_neighbs_down) = T_ind(jj)
+            END IF
+        END DO
+
+
+
+
+
 SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, react_coor_x)
 
     IMPLICIT NONE

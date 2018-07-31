@@ -1824,9 +1824,18 @@ class PotentialEnergyNetwork(Network):
 
         pass
 
-    def get_potential_energy_basins(self):
+    def get_basins(self):
 
-        pass
+        if not self.Ts:
+            self.build_Ts()
+
+        nodes_index_bottom_up = _np_asfortranarray(self.potential_energies.argsort()+1)
+        tmp_basins = _lib_potential_energy.basins(self.T_ind, self.potential_energies,
+                                                  self.T_start, nodes_index_bottom_up, self.num_nodes, self.k_total)
+
+        del(nodes_index_bottom_up)
+        return tmp_basins
+
 
 #### External Functions
 

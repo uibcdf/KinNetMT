@@ -64,6 +64,7 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
     INTEGER,DIMENSION(N_nodes),INTENT(OUT)::belongs_to_basin
 
     LOGICAL,DIMENSION(N_nodes):: is_local_minimum, already_visited
+    LOGICAL:: switch
 
     INTEGER::ii,jj
     INTEGER::num_basins
@@ -71,27 +72,67 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
     is_local_minimum(:) = .FALSE.
     already_visited(:) = .FALSE.
     belongs_to_basin(:) = -1
+    num_basins = 0
 
     DO ii=1,N_nodes
 
         next_node = Nodes_index_bottom_up(ii)
         next_pe   = T_pe(next_node)
-
-        n_neighbs = T_start(next_node+1)-T_start(next_node)
-        n_neighbs_down = 0
-        ALLOCATE(neighbs_down(n_neighbs))
+        switch    = .TRUE.
 
         DO jj=T_start(next_node)+1,T_start(next_node+1)
             eval_pe = T_pe(T_ind(jj))
             IF (eval_pe < next_pe) THEN
-                n_neighbs_down = n_neighbs_down + 1
-                neighbs_down(n_neighbs_down) = T_ind(jj)
-            END IF
+                switch = .FALSE.
+                EXIT END IF
         END DO
 
+        IF (switch .eq. .TRUE.) THEN
 
+            is_local_minimum(next_node) = .True.
+            already_visited(next_node) = .True.
+            belongs_to_basin(next_node) = num_basins
+            num_basins = num_basins + 1
 
+        END IF
 
+    END DO
+
+    DO ii=1,N_nodes
+
+        next_node = ii
+        num_nodes_in_path = 0
+
+        DO WHILE (already_visited(next_node) .eq. .FALSE.) 
+
+            num_nodes_in_path = num_nodes_in_path + 1
+            nodes_in_path(num_nodes_in_path)=next_node
+
+            eval_pe = T_pe(next_node)
+            
+            DO jj=T_start(ii)+1,T_start(ii+1)
+                IF ( T_pe(T_ind(jj)) < eval_pe) THEN
+                    candidato = T_ind(jj)
+                    eval_pe = T_pe(candidato)
+                END IF
+            END DO
+
+            next_node = candidato
+
+        END DO
+
+        IF (num_nodes_in_path > 0) THEN
+
+            kk = belongs_to_basin(next_node)
+            DO jj=1,num_nodes_in_path
+                ll = nodes_in_path(jj)
+                belongs_to_basin(ll) = kk
+                already_visited(ll) = .True.
+            END DO
+
+        END IF
+
+    END DO 
 
 SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, react_coor_x)
 
@@ -104,7 +145,6 @@ SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up,
     TYPE double_pointer
         DOUBLE PRECISION,DIMENSION(:),POINTER::dp
     END TYPE double_pointer
-
     INTEGER,INTENT(IN)::N_nodes,Ktot
     INTEGER,DIMENSION(Ktot),INTENT(IN)::T_ind
     DOUBLE PRECISION,DIMENSION(N_nodes),INTENT(IN)::T_pe

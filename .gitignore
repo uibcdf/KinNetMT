@@ -1,6 +1,7 @@
 __pycache__/*
 */__pycache__/*
 *.so
+*.mod
 INSTALL.log
 *.egg-info/*
 *.pyc

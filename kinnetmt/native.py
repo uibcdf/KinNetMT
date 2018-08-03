@@ -1,4 +1,5 @@
-from numpy import zeros as _np_zeros, exp as _np_exp, asfortranarray as _np_asfortranarray
+from numpy import zeros as _np_zeros, exp as _np_exp, asfortranarray as _np_asfortranarray,\
+                        argwhere as _argwhere
 from .lib.potential_energy import glob as _lib_potential_energy
 
 #import lib as libs
@@ -63,6 +64,7 @@ class cl_cluster():
         self.link={}
         self.alt_link={}
         self.nodes=[]
+        self.weightiest_node=0
         self.num_nodes=0
         self.weight=0
         self.k_out=0
@@ -1834,7 +1836,28 @@ class PotentialEnergyNetwork(Network):
                                                   self.T_start, nodes_index_bottom_up, self.num_nodes, self.k_total)
 
         del(nodes_index_bottom_up)
-        return tmp_basins
+
+
+        self.cluster=[]
+        self.num_clusters=tmp_basins.max()+1
+
+        for index_basin in range(self.num_clusters):
+
+            temp_cluster = cl_cluster()
+            nodes_in_basin = _argwhere(tmp_basins==index_basin).flatten()
+            pes_in_basin = self.potential_energies[nodes_in_basin]
+            temp_cluster.nodes = [ii for _,ii in sorted(zip(pes_in_basin,nodes_in_basin))]
+            temp_cluster.num_nodes = nodes_in_basin.shape[0]
+            ii = temp_cluster.nodes[0]
+            temp_cluster.weightiest_node = ii
+            temp_cluster.weight = self.node[ii].attribute['Potential_Energy']
+            temp_cluster.label = self.node[temp_cluster.weightiest_node].label
+            for ll in temp_cluster.nodes:
+                self.node[ll].cluster=index_basin
+            self.cluster.append(temp_cluster)
+
+        del(nodes_in_basin, pes_in_basin, temp_cluster, tmp_basins)
+        pass
 
 
 #### External Functions

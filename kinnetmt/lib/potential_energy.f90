@@ -63,13 +63,17 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
 
     INTEGER,DIMENSION(N_nodes),INTENT(OUT)::belongs_to_basin
 
-    LOGICAL,DIMENSION(N_nodes):: is_local_minimum, already_visited
+    LOGICAL,DIMENSION(N_nodes):: already_visited
     LOGICAL:: switch
 
-    INTEGER::ii,jj
-    INTEGER::num_basins
+    INTEGER::ii,jj,kk,ll,length_path_max
+    INTEGER::next_node,candidato,num_basins,num_nodes_in_path
+    INTEGER,DIMENSION(:),ALLOCATABLE:: nodes_in_path
+    DOUBLE PRECISION:: next_pe, eval_pe
 
-    is_local_minimum(:) = .FALSE.
+    length_path_max=10000
+    ALLOCATE(nodes_in_path(length_path_max))
+
     already_visited(:) = .FALSE.
     belongs_to_basin(:) = -1
     num_basins = 0
@@ -84,12 +88,12 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
             eval_pe = T_pe(T_ind(jj))
             IF (eval_pe < next_pe) THEN
                 switch = .FALSE.
-                EXIT END IF
+                EXIT 
+            END IF
         END DO
 
-        IF (switch .eq. .TRUE.) THEN
+        IF (switch .eqv. .TRUE.) THEN
 
-            is_local_minimum(next_node) = .True.
             already_visited(next_node) = .True.
             belongs_to_basin(next_node) = num_basins
             num_basins = num_basins + 1
@@ -103,14 +107,14 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
         next_node = ii
         num_nodes_in_path = 0
 
-        DO WHILE (already_visited(next_node) .eq. .FALSE.) 
+        DO WHILE (already_visited(next_node) .eqv. .FALSE.) 
 
             num_nodes_in_path = num_nodes_in_path + 1
             nodes_in_path(num_nodes_in_path)=next_node
 
             eval_pe = T_pe(next_node)
             
-            DO jj=T_start(ii)+1,T_start(ii+1)
+            DO jj=T_start(next_node)+1,T_start(next_node+1)
                 IF ( T_pe(T_ind(jj)) < eval_pe) THEN
                     candidato = T_ind(jj)
                     eval_pe = T_pe(candidato)
@@ -123,6 +127,12 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
 
         IF (num_nodes_in_path > 0) THEN
 
+            IF (num_nodes_in_path > length_path_max) THEN
+                PRINT*,'ERROR 01 IN BASINS FUNCTION POTENTIAL_ENERGY.F90'
+                PRINT*,'num_nodes_in_path:',num_nodes_in_path,'>',length_path_max
+                STOP
+            END IF  
+
             kk = belongs_to_basin(next_node)
             DO jj=1,num_nodes_in_path
                 ll = nodes_in_path(jj)
@@ -133,6 +143,10 @@ SUBROUTINE BASINS (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, b
         END IF
 
     END DO 
+
+    DEALLOCATE(nodes_in_path)
+
+END SUBROUTINE
 
 SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up, N_nodes, Ktot, react_coor_x)
 
@@ -154,7 +168,7 @@ SUBROUTINE LANDSCAPE_PES_BOTTOM_UP (T_ind, T_pe, T_start, Nodes_index_bottom_up,
     INTEGER,DIMENSION(N_nodes),INTENT(OUT)::react_coor_x
 
     INTEGER::ii,jj,kk,ll,mm,nn,oo
-    INTEGER::n_neighbs, n_neighbs_down, switch, xx, group_to_lump, shift
+    INTEGER::n_neighbs, n_neighbs_down, switch, xx, group_to_lump
     INTEGER::num_groups, n_neighbs_groups, next_node, n_linked_groups, aux_index_group
     DOUBLE PRECISION::next_pe,eval_Pe
     INTEGER,DIMENSION(:),ALLOCATABLE::neighbs_down

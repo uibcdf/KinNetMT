@@ -1771,6 +1771,7 @@ class PotentialEnergyNetwork(Network):
         for node_index in range(self.num_nodes):
             self.potential_energies[node_index]=self.node[node_index].attribute['Potential_Energy']._value
 
+        self._energy_units=self.node[0].attribute['Potential_Energy'].unit
         #self.set_thermodynamic_weight()
 
     def set_thermodynamic_weight(self,temperature=None,Kb=0.0083144621,KbT=2.479):
@@ -1809,7 +1810,13 @@ class PotentialEnergyNetwork(Network):
 
         return _aux_val, self.potential_energies[_aux_val]
 
-    def get_landscape_bottom_up(self):
+    def get_potential_energy_1D_landscape(self):
+
+        tmp_xx = self._get_landscape_bottom_up()
+        tmp_potential_energies = self.potential_energies
+        return tmp_xx, tmp_potential_energies*self._energy_units
+
+    def _get_landscape_bottom_up(self):
 
         if not self.Ts:
             self.build_Ts()
@@ -1826,7 +1833,7 @@ class PotentialEnergyNetwork(Network):
 
         pass
 
-    def get_basins(self):
+    def make_potential_energy_basins(self):
 
         if not self.Ts:
             self.build_Ts()
